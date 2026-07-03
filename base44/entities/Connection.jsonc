@@ -1,0 +1,34 @@
+{
+  "name": "Connection",
+  "type": "object",
+  "properties": {
+    "from_user_id": {
+      "type": "string",
+      "description": "User who sent the request"
+    },
+    "to_user_id": {
+      "type": "string",
+      "description": "User who received the request"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "accepted",
+        "declined"
+      ],
+      "default": "pending"
+    },
+    "from_display_name": {
+      "type": "string"
+    },
+    "to_display_name": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "from_user_id",
+    "to_user_id",
+    "status"
+  ]
+}

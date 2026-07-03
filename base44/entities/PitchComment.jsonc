@@ -1,0 +1,34 @@
+{
+  "name": "PitchComment",
+  "type": "object",
+  "properties": {
+    "pitch_id": {
+      "type": "string"
+    },
+    "content": {
+      "type": "string"
+    },
+    "author_display_name": {
+      "type": "string"
+    },
+    "author_avatar": {
+      "type": "string"
+    },
+    "reaction": {
+      "type": "string",
+      "enum": [
+        "\ud83d\udd25",
+        "\ud83d\udca1",
+        "\ud83d\ude80",
+        "\ud83d\udc4f",
+        "\u2764\ufe0f",
+        "\ud83e\udd14",
+        ""
+      ]
+    }
+  },
+  "required": [
+    "pitch_id",
+    "content"
+  ]
+}

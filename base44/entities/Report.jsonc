@@ -1,0 +1,45 @@
+{
+  "name": "Report",
+  "type": "object",
+  "properties": {
+    "reported_user_id": {
+      "type": "string"
+    },
+    "reported_by_id": {
+      "type": "string"
+    },
+    "reason": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "reviewed",
+        "resolved"
+      ],
+      "default": "pending"
+    },
+    "content_type": {
+      "type": "string",
+      "enum": [
+        "profile",
+        "message",
+        "pitch",
+        "opportunity",
+        "comment"
+      ]
+    },
+    "content_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "reported_user_id",
+    "reason",
+    "description"
+  ]
+}

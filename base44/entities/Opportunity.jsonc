@@ -1,0 +1,68 @@
+{
+  "name": "Opportunity",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "Internship",
+        "Competition",
+        "Hackathon",
+        "Volunteering",
+        "Research",
+        "Job",
+        "Scholarship"
+      ]
+    },
+    "organization": {
+      "type": "string"
+    },
+    "location": {
+      "type": "string"
+    },
+    "deadline": {
+      "type": "string",
+      "format": "date"
+    },
+    "link": {
+      "type": "string"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "posted_by_name": {
+      "type": "string"
+    },
+    "posted_by_avatar": {
+      "type": "string"
+    },
+    "saves_count": {
+      "type": "number",
+      "default": 0
+    },
+    "is_remote": {
+      "type": "boolean",
+      "default": false
+    },
+    "grade_levels": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "title",
+    "description",
+    "type"
+  ]
+}

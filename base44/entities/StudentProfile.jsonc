@@ -1,0 +1,137 @@
+{
+  "name": "StudentProfile",
+  "type": "object",
+  "properties": {
+    "display_name": {
+      "type": "string",
+      "description": "Display name or username"
+    },
+    "full_name": {
+      "type": "string",
+      "description": "Real name, hidden until connected"
+    },
+    "avatar_url": {
+      "type": "string",
+      "description": "Profile picture URL"
+    },
+    "school": {
+      "type": "string",
+      "description": "School name, hidden until connected"
+    },
+    "grade": {
+      "type": "string",
+      "enum": [
+        "Freshman",
+        "Sophomore",
+        "Junior",
+        "Senior"
+      ]
+    },
+    "bio": {
+      "type": "string",
+      "description": "Short bio"
+    },
+    "interests": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "List of interests"
+    },
+    "clubs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Clubs and organizations"
+    },
+    "skills": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Skills"
+    },
+    "classes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Current classes"
+    },
+    "projects": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Notable projects"
+    },
+    "awards": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Awards and achievements"
+    },
+    "looking_for": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "What the student is looking for"
+    },
+    "college_interests": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Colleges interested in"
+    },
+    "location": {
+      "type": "string",
+      "description": "General location, hidden until connected"
+    },
+    "availability": {
+      "type": "string",
+      "description": "When available to collaborate"
+    },
+    "privacy_show_name": {
+      "type": "boolean",
+      "default": false
+    },
+    "privacy_show_school": {
+      "type": "boolean",
+      "default": false
+    },
+    "privacy_show_location": {
+      "type": "boolean",
+      "default": false
+    },
+    "reputation_score": {
+      "type": "number",
+      "default": 0
+    },
+    "badges": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "streak_days": {
+      "type": "number",
+      "default": 0
+    },
+    "last_active": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "profile_complete": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "display_name"
+  ]
+}

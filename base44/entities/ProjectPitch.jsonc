@@ -1,0 +1,72 @@
+{
+  "name": "ProjectPitch",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "STEM",
+        "Arts",
+        "Business",
+        "Social Impact",
+        "Research",
+        "Hackathon",
+        "Club",
+        "Other"
+      ]
+    },
+    "skills_needed": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "team_size": {
+      "type": "number"
+    },
+    "current_members": {
+      "type": "number",
+      "default": 1
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "recruiting",
+        "in_progress",
+        "completed"
+      ],
+      "default": "recruiting"
+    },
+    "author_display_name": {
+      "type": "string"
+    },
+    "author_avatar": {
+      "type": "string"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "likes_count": {
+      "type": "number",
+      "default": 0
+    },
+    "comments_count": {
+      "type": "number",
+      "default": 0
+    }
+  },
+  "required": [
+    "title",
+    "description",
+    "category"
+  ]
+}
