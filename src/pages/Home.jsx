@@ -1,18 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import ProfileSetupModal from '@/components/ProfileSetupModal';
 import StudentCard from '@/components/StudentCard';
-import { Search, Lightbulb, Briefcase, Users, ArrowRight, Sparkles, TrendingUp, Zap } from 'lucide-react';
+import AIRecommendations from '@/components/AIRecommendations';
+import { useStreak } from '@/hooks/useStreak';
+import { Search, Lightbulb, Briefcase, Megaphone, ArrowRight, Sparkles, TrendingUp, Zap } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import { useToast } from '@/components/ui/use-toast';
+import { recalculateBadges } from '@/lib/badges';
 
 export default function Home() {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [showSetup, setShowSetup] = useState(false);
+  useStreak();
 
   const { data: me } = useQuery({
     queryKey: ['me'],
@@ -32,8 +37,8 @@ export default function Home() {
   const { data: recommended = [] } = useQuery({
     queryKey: ['recommended-students', myProfile?.id],
     queryFn: async () => {
-      const all = await base44.entities.StudentProfile.list('-created_date', 6);
-      return all.filter(p => p.created_by_id !== me?.id);
+      const all = await base44.entities.StudentProfile.list('-created_date', 50);
+      return all.filter(p => p.created_by_id !== me?.id).slice(0, 20);
     },
     enabled: !!me?.id,
   });
@@ -65,6 +70,10 @@ export default function Home() {
     }
   }, [me, myProfile]);
 
+  useEffect(() => {
+    if (me) recalculateBadges(me);
+  }, [me]);
+
   const handleProfileComplete = async (data) => {
     await base44.entities.StudentProfile.create(data);
     setShowSetup(false);
@@ -75,18 +84,22 @@ export default function Home() {
   const handleConnect = async (profile) => {
     await base44.entities.Connection.create({
       from_user_id: me.id,
+      from_profile_id: myProfile?.id,
       to_user_id: profile.created_by_id,
+      to_profile_id: profile.id,
       from_display_name: myProfile?.display_name || 'User',
       to_display_name: profile.display_name,
       status: 'pending',
     });
+    queryClient.invalidateQueries({ queryKey: ['my-connections'] });
+    if (me) await recalculateBadges(me);
     toast({ title: 'Request sent!', description: `Connection request sent to ${profile.display_name}` });
   };
 
   const getConnectionStatus = (profile) => {
     const conn = connections.find(c =>
-      (c.from_user_id === me?.id && c.to_user_id === profile.created_by_id) ||
-      (c.to_user_id === me?.id && c.from_user_id === profile.created_by_id)
+      (c.from_user_id === me?.id && c.to_profile_id === profile.id) ||
+      (c.to_user_id === me?.id && c.from_profile_id === profile.id)
     );
     return conn?.status || null;
   };
@@ -97,7 +110,7 @@ export default function Home() {
     { icon: Search, label: 'Find Students', path: '/discover', color: 'bg-purple-50 text-purple-600' },
     { icon: Lightbulb, label: 'Project Pitches', path: '/pitches', color: 'bg-amber-50 text-amber-600' },
     { icon: Briefcase, label: 'Opportunities', path: '/opportunities', color: 'bg-blue-50 text-blue-600' },
-    { icon: Users, label: 'Communities', path: '/communities', color: 'bg-teal-50 text-teal-600' },
+    { icon: Megaphone, label: 'Updates', path: '/updates', color: 'bg-teal-50 text-teal-600' },
   ];
 
   return (
@@ -157,30 +170,14 @@ export default function Home() {
         ))}
       </div>
 
-      {/* Recommended Students */}
-      {recommended.length > 0 && (
-        <section>
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <Zap size={18} className="text-purple-500" />
-              <h2 className="text-lg font-semibold font-display">Recommended for You</h2>
-            </div>
-            <Link to="/discover" className="text-sm text-purple-600 hover:underline flex items-center gap-1">
-              See all <ArrowRight size={14} />
-            </Link>
-          </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {recommended.slice(0, 3).map(profile => (
-              <StudentCard
-                key={profile.id}
-                profile={profile}
-                isConnected={getConnectionStatus(profile) === 'accepted'}
-                connectionStatus={getConnectionStatus(profile)}
-                onConnect={handleConnect}
-              />
-            ))}
-          </div>
-        </section>
+      {/* AI Recommendations */}
+      {myProfile && recommended.length > 0 && (
+        <AIRecommendations
+          myProfile={myProfile}
+          candidates={recommended}
+          getConnectionStatus={getConnectionStatus}
+          onConnect={handleConnect}
+        />
       )}
 
       {/* Recent Pitches */}

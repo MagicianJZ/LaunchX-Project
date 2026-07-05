@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { Home, Search, Lightbulb, Briefcase, MessageCircle, User, Users, Menu, X } from 'lucide-react';
+import { Home, Search, Lightbulb, Briefcase, MessageCircle, User, Megaphone, Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
@@ -10,7 +10,7 @@ const navItems = [
   { path: '/discover', icon: Search, label: 'Discover' },
   { path: '/pitches', icon: Lightbulb, label: 'Pitches' },
   { path: '/opportunities', icon: Briefcase, label: 'Opportunities' },
-  { path: '/communities', icon: Users, label: 'Communities' },
+  { path: '/updates', icon: Megaphone, label: 'Updates' },
   { path: '/messages', icon: MessageCircle, label: 'Messages' },
 ];
 

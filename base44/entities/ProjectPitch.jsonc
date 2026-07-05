@@ -62,6 +62,11 @@
     "comments_count": {
       "type": "number",
       "default": 0
+    },
+    "reactions": {
+      "type": "object",
+      "description": "Map of emoji to count for pitch-level reactions",
+      "default": {}
     }
   },
   "required": [

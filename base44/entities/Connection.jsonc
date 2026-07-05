@@ -10,6 +10,14 @@
       "type": "string",
       "description": "User who received the request"
     },
+    "from_profile_id": {
+      "type": "string",
+      "description": "Profile ID of the sender"
+    },
+    "to_profile_id": {
+      "type": "string",
+      "description": "Profile ID of the recipient"
+    },
     "status": {
       "type": "string",
       "enum": [

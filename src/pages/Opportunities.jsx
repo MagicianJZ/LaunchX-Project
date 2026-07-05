@@ -9,9 +9,12 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
-import { Plus, Briefcase, Search, Calendar, MapPin, ExternalLink, Loader2, Bookmark } from 'lucide-react';
+import { Plus, Briefcase, Search, Calendar, MapPin, ExternalLink, Loader2, Bookmark, Pencil, Trash2 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { motion } from 'framer-motion';
+import EditPostDialog from '@/components/EditPostDialog';
+import { recalculateBadges } from '@/lib/badges';
+import ConfirmDialog from '@/components/ConfirmDialog';
 
 const TYPES = ['Internship', 'Competition', 'Hackathon', 'Volunteering', 'Research', 'Job', 'Scholarship'];
 
@@ -31,6 +34,8 @@ export default function Opportunities() {
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [editPost, setEditPost] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
   const [form, setForm] = useState({
     title: '', description: '', type: '', organization: '', location: '',
     deadline: '', link: '', tags: '', is_remote: false,
@@ -70,7 +75,25 @@ export default function Opportunities() {
     setDialogOpen(false);
     setForm({ title: '', description: '', type: '', organization: '', location: '', deadline: '', link: '', tags: '', is_remote: false });
     queryClient.invalidateQueries({ queryKey: ['opportunities'] });
+    if (me) await recalculateBadges(me);
     toast({ title: 'Opportunity posted!', description: 'It\'s now visible to all students.' });
+  };
+
+  const handleEditSave = async (data) => {
+    const { id, created_date, updated_date, created_by_id, ...updateData } = data;
+    await base44.entities.Opportunity.update(editPost.id, updateData);
+    setEditPost(null);
+    queryClient.invalidateQueries({ queryKey: ['opportunities'] });
+    toast({ title: 'Opportunity updated!' });
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteTarget) return;
+    await base44.entities.Opportunity.delete(deleteTarget.id);
+    setDeleteTarget(null);
+    queryClient.invalidateQueries({ queryKey: ['opportunities'] });
+    if (me) await recalculateBadges(me);
+    toast({ title: 'Opportunity deleted' });
   };
 
   return (
@@ -200,12 +223,40 @@ export default function Opportunities() {
                       </a>
                     </Button>
                   )}
+                  {opp.created_by_id === me?.id && (
+                    <>
+                      <Button size="sm" variant="ghost" className="rounded-xl" onClick={() => setEditPost(opp)}>
+                        <Pencil size={14} className="mr-1" /> Edit
+                      </Button>
+                      <Button size="sm" variant="ghost" className="rounded-xl text-destructive hover:bg-destructive/10" onClick={() => setDeleteTarget(opp)}>
+                        <Trash2 size={14} className="mr-1" /> Delete
+                      </Button>
+                    </>
+                  )}
                 </div>
               </div>
             </motion.div>
           ))}
         </div>
       )}
+
+      <EditPostDialog
+        open={!!editPost}
+        onOpenChange={(v) => !v && setEditPost(null)}
+        post={editPost}
+        fields={['title', 'description', 'organization', 'location', 'deadline', 'link', 'tags']}
+        categories={null}
+        onSave={handleEditSave}
+        title="Edit Opportunity"
+      />
+
+      <ConfirmDialog
+        open={!!deleteTarget}
+        onOpenChange={(v) => !v && setDeleteTarget(null)}
+        title="Delete Opportunity?"
+        description="Are you sure you want to delete this opportunity? This action cannot be undone."
+        onConfirm={handleDeleteConfirm}
+      />
     </div>
   );
 }

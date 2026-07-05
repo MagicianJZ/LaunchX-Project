@@ -1,22 +1,29 @@
 import React, { useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Heart, Users, MessageSquare, Send, Loader2 } from 'lucide-react';
+import { ArrowLeft, Heart, Users, MessageSquare, Send, Loader2, Pencil, Trash2 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { motion } from 'framer-motion';
+import EditPostDialog from '@/components/EditPostDialog';
+import { recalculateBadges } from '@/lib/badges';
+import ConfirmDialog from '@/components/ConfirmDialog';
 
+const CATEGORIES = ['STEM', 'Arts', 'Business', 'Social Impact', 'Research', 'Hackathon', 'Club', 'Other'];
 const REACTIONS = ['🔥', '💡', '🚀', '👏', '❤️', '🤔'];
 
 export default function PitchDetail() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [comment, setComment] = useState('');
   const [selectedReaction, setSelectedReaction] = useState('');
+  const [editOpen, setEditOpen] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState(false);
 
   const { data: me } = useQuery({ queryKey: ['me'], queryFn: () => base44.auth.me() });
   const { data: myProfile } = useQuery({
@@ -51,11 +58,36 @@ export default function PitchDetail() {
     setSelectedReaction('');
     queryClient.invalidateQueries({ queryKey: ['pitch-comments', id] });
     queryClient.invalidateQueries({ queryKey: ['pitch', id] });
+    if (me) await recalculateBadges(me);
   };
 
   const handleLike = async () => {
     await base44.entities.ProjectPitch.update(id, { likes_count: (pitch.likes_count || 0) + 1 });
     queryClient.invalidateQueries({ queryKey: ['pitch', id] });
+  };
+
+  const handleReact = async (emoji) => {
+    const reactions = pitch.reactions || {};
+    const newReactions = { ...reactions, [emoji]: (reactions[emoji] || 0) + 1 };
+    await base44.entities.ProjectPitch.update(id, { reactions: newReactions });
+    queryClient.invalidateQueries({ queryKey: ['pitch', id] });
+  };
+
+  const handleEditSave = async (data) => {
+    const { id: _, created_date, updated_date, created_by_id, ...updateData } = data;
+    await base44.entities.ProjectPitch.update(id, updateData);
+    setEditOpen(false);
+    queryClient.invalidateQueries({ queryKey: ['pitch', id] });
+    queryClient.invalidateQueries({ queryKey: ['pitches'] });
+    toast({ title: 'Pitch updated!' });
+  };
+
+  const handleDeleteConfirm = async () => {
+    setDeleteConfirm(false);
+    await base44.entities.ProjectPitch.delete(id);
+    queryClient.invalidateQueries({ queryKey: ['pitches'] });
+    toast({ title: 'Pitch deleted' });
+    navigate('/pitches');
   };
 
   if (isLoading) return (
@@ -115,9 +147,40 @@ export default function PitchDetail() {
           <span className="flex items-center gap-1 text-sm text-muted-foreground">
             <Users size={14} /> {pitch.current_members || 1}/{pitch.team_size || '?'} members
           </span>
-          <Button variant="ghost" size="sm" className="ml-auto" onClick={handleLike}>
-            <Heart size={14} className="mr-1" /> {pitch.likes_count || 0}
-          </Button>
+          <div className="ml-auto flex items-center gap-2">
+            {pitch.created_by_id === me?.id && (
+              <>
+                <Button variant="ghost" size="sm" onClick={() => setEditOpen(true)}>
+                  <Pencil size={14} className="mr-1" /> Edit
+                </Button>
+                <Button variant="ghost" size="sm" className="text-destructive hover:bg-destructive/10" onClick={() => setDeleteConfirm(true)}>
+                  <Trash2 size={14} className="mr-1" /> Delete
+                </Button>
+              </>
+            )}
+            <Button variant="ghost" size="sm" onClick={handleLike}>
+              <Heart size={14} className="mr-1" /> {pitch.likes_count || 0}
+            </Button>
+          </div>
+        </div>
+
+        {/* Pitch Reactions */}
+        <div className="flex items-center gap-2 mt-4">
+          {REACTIONS.map(emoji => {
+            const count = pitch.reactions?.[emoji] || 0;
+            return (
+              <button
+                key={emoji}
+                onClick={() => handleReact(emoji)}
+                className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-sm transition-all ${
+                  count > 0 ? 'bg-purple-50 border border-purple-200' : 'bg-muted hover:bg-purple-50'
+                }`}
+              >
+                <span className="text-base">{emoji}</span>
+                {count > 0 && <span className="text-xs font-medium text-purple-700">{count}</span>}
+              </button>
+            );
+          })}
         </div>
       </motion.div>
 
@@ -174,6 +237,24 @@ export default function PitchDetail() {
           </div>
         </div>
       </div>
+
+      <EditPostDialog
+        open={editOpen}
+        onOpenChange={setEditOpen}
+        post={pitch}
+        fields={['title', 'description', 'category', 'team_size', 'status', 'skills_needed', 'tags']}
+        categories={CATEGORIES}
+        onSave={handleEditSave}
+        title="Edit Pitch"
+      />
+
+      <ConfirmDialog
+        open={deleteConfirm}
+        onOpenChange={setDeleteConfirm}
+        title="Delete Pitch?"
+        description="Are you sure you want to delete this pitch? This action cannot be undone."
+        onConfirm={handleDeleteConfirm}
+      />
     </div>
   );
 }

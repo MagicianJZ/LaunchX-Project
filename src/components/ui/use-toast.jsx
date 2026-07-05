@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 
 const TOAST_LIMIT = 20;
-const TOAST_REMOVE_DELAY = 1000000;
+const TOAST_REMOVE_DELAY = 0;
 const TOAST_AUTO_DISMISS_DELAY = 7000;
 
 const actionTypes = {

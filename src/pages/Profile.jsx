@@ -33,7 +33,10 @@ export default function Profile() {
 
   const { data: pendingRequests = [] } = useQuery({
     queryKey: ['pending-requests', me?.id],
-    queryFn: () => base44.entities.Connection.filter({ to_user_id: me.id, status: 'pending' }),
+    queryFn: async () => {
+      const all = await base44.entities.Connection.filter({ to_user_id: me.id, status: 'pending' });
+      return all.filter(c => c.from_user_id !== me.id);
+    },
     enabled: !!me?.id,
   });
 
@@ -185,6 +188,16 @@ export default function Profile() {
               ) : (
                 <div className="space-y-4">
                   {myProfile.bio && <p className="text-muted-foreground">{myProfile.bio}</p>}
+                  {myProfile.badges?.length > 0 && (
+                    <div>
+                      <p className="text-sm font-medium mb-1.5">Badges</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {myProfile.badges.map(badge => (
+                          <Badge key={badge} variant="secondary" className="text-xs bg-purple-50 text-purple-700 border-0">{badge}</Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                   {['interests', 'skills', 'clubs', 'looking_for'].map(field => (
                     myProfile[field]?.length > 0 && (
                       <div key={field}>

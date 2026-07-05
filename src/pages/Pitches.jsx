@@ -9,9 +9,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Lightbulb, Search, Users, MessageSquare, Heart, Loader2 } from 'lucide-react';
+import { Plus, Lightbulb, Search, Users, MessageSquare, Heart, Loader2, Pencil, Trash2 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { motion } from 'framer-motion';
+import { recalculateBadges } from '@/lib/badges';
+import ConfirmDialog from '@/components/ConfirmDialog';
+import EditPostDialog from '@/components/EditPostDialog';
 
 const CATEGORIES = ['STEM', 'Arts', 'Business', 'Social Impact', 'Research', 'Hackathon', 'Club', 'Other'];
 
@@ -32,6 +35,8 @@ export default function Pitches() {
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [editPost, setEditPost] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
   const [form, setForm] = useState({
     title: '', description: '', category: '', team_size: '', skills_needed: '', tags: ''
   });
@@ -74,7 +79,25 @@ export default function Pitches() {
     setDialogOpen(false);
     setForm({ title: '', description: '', category: '', team_size: '', skills_needed: '', tags: '' });
     queryClient.invalidateQueries({ queryKey: ['pitches'] });
+    if (me) await recalculateBadges(me);
     toast({ title: 'Pitch created!', description: 'Your project pitch is now live.' });
+  };
+
+  const handleEditSave = async (data) => {
+    const { id, created_date, updated_date, created_by_id, ...updateData } = data;
+    await base44.entities.ProjectPitch.update(editPost.id, updateData);
+    setEditPost(null);
+    queryClient.invalidateQueries({ queryKey: ['pitches'] });
+    toast({ title: 'Pitch updated!' });
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteTarget) return;
+    await base44.entities.ProjectPitch.delete(deleteTarget.id);
+    setDeleteTarget(null);
+    queryClient.invalidateQueries({ queryKey: ['pitches'] });
+    if (me) await recalculateBadges(me);
+    toast({ title: 'Pitch deleted' });
   };
 
   return (
@@ -163,13 +186,31 @@ export default function Pitches() {
           {filtered.map((pitch, i) => (
             <motion.div key={pitch.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03 }}>
               <Link to={`/pitches/${pitch.id}`} className="block bg-card rounded-2xl border border-border p-6 hover:shadow-lg hover:shadow-purple-500/5 transition-all">
-                <div className="flex items-start justify-between">
+                <div className="flex items-start justify-between gap-2">
                   <Badge className={`${CATEGORY_COLORS[pitch.category] || 'bg-gray-50 text-gray-700'} border-0 text-xs`}>
                     {pitch.category}
                   </Badge>
-                  <Badge variant="outline" className={`text-xs ${pitch.status === 'recruiting' ? 'text-green-600 border-green-200' : 'text-muted-foreground'}`}>
-                    {pitch.status || 'recruiting'}
-                  </Badge>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className={`text-xs ${pitch.status === 'recruiting' ? 'text-green-600 border-green-200' : 'text-muted-foreground'}`}>
+                      {pitch.status || 'recruiting'}
+                    </Badge>
+                    {pitch.created_by_id === me?.id && (
+                      <>
+                        <button
+                          onClick={(e) => { e.preventDefault(); setEditPost(pitch); }}
+                          className="p-1 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                          <Pencil size={14} />
+                        </button>
+                        <button
+                          onClick={(e) => { e.preventDefault(); setDeleteTarget(pitch); }}
+                          className="p-1 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </>
+                    )}
+                  </div>
                 </div>
                 <h3 className="font-semibold text-lg mt-3 mb-1">{pitch.title}</h3>
                 <p className="text-sm text-muted-foreground line-clamp-2">{pitch.description}</p>
@@ -191,6 +232,24 @@ export default function Pitches() {
           ))}
         </div>
       )}
+
+      <EditPostDialog
+        open={!!editPost}
+        onOpenChange={(v) => !v && setEditPost(null)}
+        post={editPost}
+        fields={['title', 'description', 'category', 'team_size', 'status', 'skills_needed', 'tags']}
+        categories={CATEGORIES}
+        onSave={handleEditSave}
+        title="Edit Pitch"
+      />
+
+      <ConfirmDialog
+        open={!!deleteTarget}
+        onOpenChange={(v) => !v && setDeleteTarget(null)}
+        title="Delete Pitch?"
+        description="Are you sure you want to delete this pitch? This action cannot be undone."
+        onConfirm={handleDeleteConfirm}
+      />
     </div>
   );
 }

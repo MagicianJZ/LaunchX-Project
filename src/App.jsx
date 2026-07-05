@@ -20,7 +20,7 @@ import Pitches from '@/pages/Pitches';
 import PitchDetail from '@/pages/PitchDetail';
 import Opportunities from '@/pages/Opportunities';
 import Messages from '@/pages/Messages';
-import Communities from '@/pages/Communities';
+import Updates from '@/pages/Updates';
 import Profile from '@/pages/Profile';
 
 const AuthenticatedApp = () => {
@@ -62,7 +62,7 @@ const AuthenticatedApp = () => {
           <Route path="/pitches/:id" element={<PitchDetail />} />
           <Route path="/opportunities" element={<Opportunities />} />
           <Route path="/messages" element={<Messages />} />
-          <Route path="/communities" element={<Communities />} />
+          <Route path="/updates" element={<Updates />} />
           <Route path="/profile" element={<Profile />} />
         </Route>
       </Route>

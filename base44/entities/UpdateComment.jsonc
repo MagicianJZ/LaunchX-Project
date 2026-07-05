@@ -1,0 +1,19 @@
+{
+  "name": "UpdateComment",
+  "type": "object",
+  "properties": {
+    "update_id": {
+      "type": "string"
+    },
+    "content": {
+      "type": "string"
+    },
+    "author_display_name": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "update_id",
+    "content"
+  ]
+}

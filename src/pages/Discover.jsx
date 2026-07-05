@@ -9,6 +9,7 @@ import { Search, Filter, Sparkles, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
 import { useNavigate } from 'react-router-dom';
+import { recalculateBadges } from '@/lib/badges';
 
 export default function Discover() {
   const { toast } = useToast();
@@ -74,8 +75,8 @@ export default function Discover() {
 
   const getConnectionStatus = (profile) => {
     const conn = connections.find(c =>
-      (c.from_user_id === me?.id && c.to_user_id === profile.created_by_id) ||
-      (c.to_user_id === me?.id && c.from_user_id === profile.created_by_id)
+      (c.from_user_id === me?.id && c.to_profile_id === profile.id) ||
+      (c.to_user_id === me?.id && c.from_profile_id === profile.id)
     );
     return conn?.status || null;
   };
@@ -83,12 +84,15 @@ export default function Discover() {
   const handleConnect = async (profile) => {
     await base44.entities.Connection.create({
       from_user_id: me.id,
+      from_profile_id: myProfile?.id,
       to_user_id: profile.created_by_id,
+      to_profile_id: profile.id,
       from_display_name: myProfile?.display_name || 'User',
       to_display_name: profile.display_name,
       status: 'pending',
     });
     queryClient.invalidateQueries({ queryKey: ['my-connections'] });
+    if (me) await recalculateBadges(me);
     toast({ title: 'Request sent!', description: `Connection request sent to ${profile.display_name}` });
   };
 
