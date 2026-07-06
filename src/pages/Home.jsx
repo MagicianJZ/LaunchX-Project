@@ -71,8 +71,8 @@ export default function Home() {
   }, [me, myProfile]);
 
   useEffect(() => {
-    if (me) recalculateBadges(me);
-  }, [me]);
+    if (me?.id && myProfile?.id) recalculateBadges(me);
+  }, [me?.id, myProfile?.id]);
 
   const handleProfileComplete = async (data) => {
     await base44.entities.StudentProfile.create(data);
