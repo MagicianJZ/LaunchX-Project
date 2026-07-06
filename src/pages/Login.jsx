@@ -18,10 +18,19 @@ export default function Login() {
     e.preventDefault();
     setError("");
     setLoading(true);
+    // #region agent log
+    fetch('http://127.0.0.1:7756/ingest/0c742865-deee-4e9e-a01c-70568e0f44ff',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'eaa759'},body:JSON.stringify({sessionId:'eaa759',runId:'initial',hypothesisId:'H1',location:'src/pages/Login.jsx:21',message:'email password login submitted',data:{emailPresent:Boolean(email),passwordPresent:Boolean(password),emailLength:email.length,path:window.location.pathname,hash:window.location.hash},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
     try {
-      await base44.auth.loginViaEmailPassword(email, password);
+      const loginResponse = await base44.auth.loginViaEmailPassword(email, password);
+      // #region agent log
+      fetch('http://127.0.0.1:7756/ingest/0c742865-deee-4e9e-a01c-70568e0f44ff',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'eaa759'},body:JSON.stringify({sessionId:'eaa759',runId:'initial',hypothesisId:'H2,H3',location:'src/pages/Login.jsx:25',message:'email password login succeeded before redirect',data:{hasAccessToken:Boolean(loginResponse?.access_token),hasUser:Boolean(loginResponse?.user),path:window.location.pathname,hash:window.location.hash,redirectTarget:'/'},timestamp:Date.now()})}).catch(()=>{});
+      // #endregion
       window.location.href = "/";
     } catch (err) {
+      // #region agent log
+      fetch('http://127.0.0.1:7756/ingest/0c742865-deee-4e9e-a01c-70568e0f44ff',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'eaa759'},body:JSON.stringify({sessionId:'eaa759',runId:'initial',hypothesisId:'H1',location:'src/pages/Login.jsx:29',message:'email password login failed',data:{name:err?.name,status:err?.status,responseStatus:err?.response?.status,reason:err?.data?.extra_data?.reason||err?.response?.data?.extra_data?.reason,message:err?.message},timestamp:Date.now()})}).catch(()=>{});
+      // #endregion
       setError(err.message || "Invalid email or password");
     } finally {
       setLoading(false);
@@ -29,6 +38,9 @@ export default function Login() {
   };
 
   const handleGoogle = () => {
+    // #region agent log
+    fetch('http://127.0.0.1:7756/ingest/0c742865-deee-4e9e-a01c-70568e0f44ff',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'eaa759'},body:JSON.stringify({sessionId:'eaa759',runId:'initial',hypothesisId:'H5',location:'src/pages/Login.jsx:39',message:'google login invoked',data:{path:window.location.pathname,hash:window.location.hash,redirectTarget:'/'},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
     base44.auth.loginWithProvider("google", "/");
   };
 
