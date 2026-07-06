@@ -175,6 +175,7 @@ export default function Home() {
           candidates={recommended}
           getConnectionStatus={getConnectionStatus}
           onConnect={handleConnect}
+          onMessage={handleMessage}
         />
       )}
 

@@ -122,7 +122,7 @@ For each recommendation, give a short, friendly, specific reason (max 15 words) 
                 </div>
                 <div className="mt-3">
                   {status === 'accepted' ? (
-                    <Button size="sm" variant="outline" className="w-full" onClick={() => onMessage?.(profile)}>
+                    <Button size="sm" variant="outline" className="w-full" onClick={() => onMessage?.(profile)} disabled={!onMessage}>
                       <MessageCircle size={14} className="mr-1.5" /> Message
                     </Button>
                   ) : status === 'pending' ? (
