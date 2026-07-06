@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
-import { Plus, Briefcase, Search, Calendar, MapPin, ExternalLink, Loader2, Bookmark, Pencil, Trash2 } from 'lucide-react';
+import { Plus, Briefcase, Search, Calendar, MapPin, ExternalLink, Loader2, Pencil, Trash2 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { motion } from 'framer-motion';
 import EditPostDialog from '@/components/EditPostDialog';
